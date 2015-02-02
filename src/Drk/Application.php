@@ -4,11 +4,13 @@ namespace Drk;
 use Drk\Uri;
 use Drk\Controller;
 use Drk\Loader;
+use Drk\DoctrineWrapper;
 
 class Application {
 
-	public $controller;
-	public $method;
+	public  $controller;
+	public  $method;
+	private $em;
 	private $config;
 
 	public function __construct($loader, $config)
@@ -31,10 +33,21 @@ class Application {
 		$this->controller = $controller->getController();
 		$this->method     = $controller->getMethod();
 
+
 		if($this->controller === null)
 			$this->controller = $this->namespace.'\\Controllers\\'.$this->getConfig('routerDefault');
 
 		$this->loader->add($this->namespace, realpath('../'));
+	}
+
+	public function setEm($em)
+	{
+		$this->em = $em;
+	}
+
+	public function getEm()
+	{
+		return $this->em;
 	}
 
 	public function getConfig($i)
@@ -51,6 +64,7 @@ class Application {
 	{	
 		$class  = new $this->controller;
 		$class->loader = new Loader($this->namespace);
+		$class->app = $this;
 		$method = $this->method;
 
 		if(method_exists($class, $method))
